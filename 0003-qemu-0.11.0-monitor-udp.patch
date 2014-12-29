@@ -1,0 +1,31 @@
+diff --git a/net.c b/net.c
+index d7b125e..b216bfd 100644
+--- a/net.c
++++ b/net.c
+@@ -3268,6 +3268,13 @@ static int net_host_check_device(const char *device)
+ #ifdef CONFIG_VDE
+                                        ,"vde"
+ #endif
++                                       ,"udp"
++#ifndef _WIN32
++                                       ,"lcap"
++#endif
++#ifdef CONFIG_PCAP
++                                       ,"pcap"
++#endif
+     };
+     for (i = 0; i < sizeof(valid_param_list) / sizeof(char *); i++) {
+         if (!strncmp(valid_param_list[i], device,
+diff --git a/qemu-monitor.hx b/qemu-monitor.hx
+index 11bdb2c..0687828 100644
+--- a/qemu-monitor.hx
++++ b/qemu-monitor.hx
+@@ -527,7 +527,7 @@ Hot remove PCI device.
+ ETEXI
+ 
+     { "host_net_add", "ss?", net_host_device_add,
+-      "tap|user|socket|vde|dump [options]", "add host VLAN client" },
++      "tap|user|socket|vde|udp|lcap|pcap|dump [options]", "add host VLAN client" },
+ STEXI
+ @item host_net_add
+ Add host VLAN client.

@@ -1,0 +1,142 @@
+diff --git a/configure b/configure
+index cac4198..a75111d 100755
+--- a/configure
++++ b/configure
+@@ -1356,9 +1356,51 @@ fi
+ # Do we need librt
+ CLOCKLIBS=""
+ cat > $TMPC <<EOF
+-#include <signal.h>
++#include <unistd.h>
++#include <fcntl.h>
+ #include <time.h>
+-int main(void) { clockid_t id; return clock_gettime(id, NULL); }
++#include <errno.h>
++#include <sys/time.h>
++#include <signal.h>
++#ifdef __FreeBSD__
++#include <sys/param.h>
++#endif
++
++#include <libfdt.h>
++
++#ifdef __linux__
++#include <sys/ioctl.h>
++#include <linux/rtc.h>
++/* For the benefit of older linux systems which don't supply it,
++   we use a local copy of hpet.h. */
++/* #include <linux/hpet.h> */
++#endif
++
++#ifdef _WIN32
++#include <windows.h>
++#include <mmsystem.h>
++#endif
++
++int main(void) {
++    timer_t host_timer;
++    struct itimerspec timeout;
++    int64_t nearest_delta_ns = 250000;
++
++    /* check whether a timer is already running */
++    if (timer_gettime(host_timer, &timeout)) {
++        return 1;
++    }
++
++    timeout.it_interval.tv_sec = 0;
++    timeout.it_interval.tv_nsec = 0; /* 0 for one-shot timer */
++    timeout.it_value.tv_sec =  nearest_delta_ns / 1000000000;
++    timeout.it_value.tv_nsec = nearest_delta_ns % 1000000000;
++    if (timer_settime(host_timer, 0 /* RELATIVE */, &timeout, NULL)) {
++        return 1;
++    }
++
++    return 0;
++}
+ EOF
+ 
+ rt=no
+diff --git a/hw/eepro100.c b/hw/eepro100.c
+index ec31a6a..9eede2c 100644
+--- a/hw/eepro100.c
++++ b/hw/eepro100.c
+@@ -42,6 +42,7 @@
+ #include "pci.h"
+ #include "net.h"
+ #include "eeprom93xx.h"
++#include "qemu-common.h"
+ 
+ /* Common declarations for all PCI devices. */
+ 
+@@ -87,9 +88,6 @@
+ #define PCI_IO_SIZE             64
+ #define PCI_FLASH_SIZE          (128 * KiB)
+ 
+-#define BIT(n) (1 << (n))
+-#define BITS(n, m) (((0xffffffffU << (31 - n)) >> (31 - n + m)) << m)
+-
+ /* The SCB accepts the following controls for the Tx and Rx units: */
+ #define  CU_NOP         0x0000  /* No operation. */
+ #define  CU_START       0x0010  /* CU start. */
+diff --git a/libfdt_env.h b/libfdt_env.h
+index ee0419f..d0e71cf 100644
+--- a/libfdt_env.h
++++ b/libfdt_env.h
+@@ -25,6 +25,18 @@
+ #include <endian.h>
+ #include <byteswap.h>
+ 
++#ifdef __CHECKER__
++#define __force __attribute__((force))
++#define __bitwise __attribute__((bitwise))
++#else
++#define __force
++#define __bitwise
++#endif
++
++typedef uint16_t __bitwise fdt16_t;
++typedef uint32_t __bitwise fdt32_t;
++typedef uint64_t __bitwise fdt64_t;
++
+ #if __BYTE_ORDER == __BIG_ENDIAN
+ #define fdt32_to_cpu(x)		(x)
+ #define cpu_to_fdt32(x)		(x)
+diff --git a/linux-user/signal.c b/linux-user/signal.c
+index 1aa9eab..7933162 100644
+--- a/linux-user/signal.c
++++ b/linux-user/signal.c
+@@ -3060,7 +3060,7 @@ struct target_signal_frame {
+ };
+ 
+ struct rt_signal_frame {
+-    struct siginfo info;
++    siginfo_t info;
+     struct ucontext uc;
+     uint32_t tramp[2];
+ };
+@@ -3277,9 +3277,9 @@ struct target_signal_frame {
+ };
+ 
+ struct rt_signal_frame {
+-        struct siginfo *pinfo;
++        siginfo_t *pinfo;
+         void *puc;
+-        struct siginfo info;
++        siginfo_t info;
+         struct ucontext uc;
+         uint8_t retcode[8];       /* Trampoline code. */
+ };
+diff --git a/qemu-common.h b/qemu-common.h
+index 6a15f89..7e82a41 100644
+--- a/qemu-common.h
++++ b/qemu-common.h
+@@ -26,6 +26,9 @@
+ #include <assert.h>
+ #include "config-host.h"
+ 
++#define BIT(n) (1 << (n))
++#define BITS(n, m) (((0xffffffffU << (31 - n)) >> (31 - n + m)) << m)
++
+ #ifndef O_LARGEFILE
+ #define O_LARGEFILE 0
+ #endif
