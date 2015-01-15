@@ -1,0 +1,53 @@
+diff --git a/net.c b/net.c
+index b216bfd..775cb83 100644
+--- a/net.c
++++ b/net.c
+@@ -2273,21 +2273,36 @@ static ssize_t dudp_receive(VLANClientState *vc, const uint8_t *buf, size_t size
+ 	return res;
+ }
+ 
++static void net_dudp_cleanup(VLANClientState *vc)
++{
++	DUDPState *s = vc->opaque;
++	qemu_set_fd_handler(s->rfd, NULL, NULL, NULL);
++	closesocket(s->rfd);
++	qemu_free(s);
++}
++
+ static int net_dudp_init(VLANState *vlan, const char *model, const char *name,
+ 						 int lport, char *rhost, int rport) {
+ 	DUDPState *s;
+ 	struct sockaddr_in receiver;
+-	int res;
++	int val, res;
+ 
+ 	s=qemu_mallocz(sizeof(DUDPState));
+ 	if (!s) {
+ 		return -1;
+ 	}
+ 
+-	printf ("\nnet_dudp_init(%i,%s,%i)\n", lport, rhost, rport);
+-
+ 	s->rfd=socket(AF_INET,SOCK_DGRAM,IPPROTO_UDP);
+ 
++	if (s->rfd < 0) {
++		fprintf (stderr,"socket error:%s\n",strerror(errno));
++		return -1;
++	}
++
++	/* allow fast reuse */
++	val = 1;
++	setsockopt(s->rfd, SOL_SOCKET, SO_REUSEADDR, (const char *)&val, sizeof(val));
++
+ 	receiver.sin_family=AF_INET;
+ 	receiver.sin_addr.s_addr=INADDR_ANY;
+ 	receiver.sin_port=htons(lport);
+@@ -2303,7 +2318,7 @@ static int net_dudp_init(VLANState *vlan, const char *model, const char *name,
+ 	s->sender.sin_port=htons(rport);
+ 	inet_aton(rhost,&s->sender.sin_addr);
+ 
+-	s->vc= qemu_new_vlan_client(vlan, model, name, NULL, dudp_receive, NULL, NULL, s);
++	s->vc= qemu_new_vlan_client(vlan, model, name, NULL, dudp_receive, NULL, net_dudp_cleanup, s);
+ 
+ 	qemu_set_fd_handler(s->rfd, dudp_send, NULL, s);
+ 	snprintf(s->vc->info_str, sizeof(s->vc->info_str),"dcap: %i->%s:%i",lport,rhost,rport);
