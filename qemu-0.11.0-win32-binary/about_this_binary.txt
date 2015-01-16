@@ -1,0 +1,58 @@
+The binary was build on Windows XP using MinGW and MSYS.
+It was build with pcap support, so it needs wpcap.dll installed on the system.
+
+
+cd qemu
+mkdir -p bin/release/native
+cd bin/release/native
+../../../configure --static --target-list=i386-softmmu
+
+Install prefix    c:/Program Files/Qemu
+BIOS directory    c:/Program Files/Qemu
+binary directory  c:/Program Files/Qemu
+Source path       /c/qemu
+C compiler        gcc
+Host C compiler   gcc
+ARCH_CFLAGS       -m32
+make              make
+install           install
+host CPU          i386
+host big endian   no
+target list       i386-softmmu
+tcg debug enabled no
+gprof enabled     no
+sparse enabled    no
+strip binaries    yes
+profiler          no
+static build      yes
+-Werror enabled   no
+SDL support       yes
+SDL static link   yes
+curses support    no
+curl support      no
+mingw32 support   yes
+Audio drivers
+Extra audio cards ac97 es1370 sb16
+Mixer emulation   no
+VNC TLS support   no
+VNC SASL support  no
+kqemu support     yes
+xen support       no
+brlapi support    no
+Documentation     no
+NPTL support      no
+vde support       no
+pthread           yes
+AIO support       yes
+IO thread         no
+Install blobs     yes
+KVM support       no
+fdt support       yes
+preadv support    no
+PCAP support      yes
+
+
+make
+make install
+
+
