@@ -1,0 +1,310 @@
+﻿Instructions how to perform native build of Qemu v0.11.0 (tested on Windows XP)
+
+Qemu versions older than v0.15.0 fail to build using new MinGW build environment.
+
+Exactly, Qemu versions before commit cea5f9a28faa528b6b1b117c9ab2d8828f473fef do not build.
+Version v0.14.1 fails to build.
+Version v0.15.0-rc0 builds OK.
+
+The solution to build Qemu v0.11.0 is to install old MinGW build environment (gcc and all libraries) dated earlier than Sep 22, 2009
+
+The build is performed using MinGS and MSYS build environment (versions older than Sep 2009).
+
+General build instructions are given on the sites:
+
+http://wiki.qemu.org/Hosts/W32
+
+http://www.mingw.org/wiki/InstallationHOWTOforMinGW
+
+
+-
+
+
+Install older version of MinGW:
+
+
+Download gcc-3.4.5:
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/gcc/Version3/Current%20Release_%20gcc-3.4.5-20060117-3/
+gcc-core-3.4.5-20060117-3.tar.gz
+
+Create empty directory:
+C:\MinGW
+
+Use "7z" program to unpack gcc-core-3.4.5-20060117-3.tar.gz to C:\MinGW directory
+
+
+Download following versions of additional libraries and unpack them to C:\MinGW:
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/binutils/binutils-2.19.1/
+binutils-2.19.1-mingw32-bin.tar.gz
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/mingwrt/mingwrt-3.15.2/
+mingwrt-3.15.2-mingw32-dev.tar.gz
+mingwrt-3.15.2-mingw32-dll.tar.gz
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/w32api/w32api-3.13/
+w32api-3.13-mingw32-dev.tar.gz
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/mpc/mpc-0.8.1-1/
+libmpc-0.8.1-1-mingw32-dll-2.tar.lzma
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/mpfr/mpfr-2.4.1-1/
+libmpfr-2.4.1-1-mingw32-dll-1.tar.lzma
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/gmp/gmp-5.0.1-1/
+libgmp-5.0.1-1-mingw32-dll-10.tar.lzma
+
+
+Build libpthreadGC2.a static library:
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/pthreads-w32/pthreads-w32-2.8.0-3/
+pthreads-w32-2.8.0-3-mingw32-dev.tar.lzma
+pthreads-w32-2.8.0-3-mingw32-src.tar.lzma
+
+Unpack pthreads-w32-2.8.0-3-mingw32-src.tar.lzma to an empty folder, then:
+
+cd /c/path/to/pthreads-w32-2-8-0-release
+make clean GC-static
+
+Copy libpthreadGC2.a to C:\MinGW\lib
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/libiconv/libiconv-1.13/
+libiconv-1.13-mingw32-dll-2.tar.gz
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/zlib/
+zlib-1.2.8-1-mingw32-dev.tar.lzma
+zlib-1.2.8-1-mingw32-dll.tar.lzma
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Base/gettext/gettext-0.17-1/
+gettext-0.17-1-mingw32-bin.tar.lzma
+gettext-0.17-1-mingw32-dev.tar.lzma
+
+
+
+Download and unpack additional utilities:
+
+http://sourceforge.net/projects/mingw/files/MinGW/Extension/make/make-3.82.90-cvs/make-3.82.90-2-mingw32-cvs-20120902-bin.tar.lzma/download
+make-3.82.90-2-mingw32-cvs-20120902-bin.tar.lzma
+
+
+http://sourceforge.net/projects/mingw/files/MinGW/Extension/mingw-utils/mingw-utils-0.4-1/mingw-utils-0.4-1-mingw32-bin.tar.lzma/download
+mingw-utils-0.4-1-mingw32-bin.tar.lzma
+
+
+
+Install MSYS:
+
+
+Follow instructions on the site:
+http://www.mingw.org/wiki/MSYS
+
+
+Download:
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/msys-core/msys-1.0.11/
+
+
+Create empty directory:
+C:\msys
+
+Use "7z" program to unpack everything to C:\msys directory
+
+
+Install additionally (for dd.exe and other necessary utilities):
+
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/coreutils/coreutils-5.97-2/
+(bin, ext)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/msys-core/msys-1.0.11/msysCORE-1.0.11-msys-1.0.11-base-bin.tar.lzma/download
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/bash/bash-3.1.17-2/
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/gettext/gettext-0.17-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/libiconv/libiconv-1.13.1-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/xz/xz-4.999.8beta_20090725git-1/
+(dll, bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/bzip2/bzip2-1.0.5-1/
+(bin, dll)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/coreutils/coreutils-5.97-2/coreutils-5.97-2-msys-1.0.11-ext.tar.lzma/download
+(ext)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/findutils/findutils-4.4.2-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/diffutils/diffutils-2.8.7.20071206cvs-2/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/tar/tar-1.22-1/
+(bin, ext)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/less/less-436-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/texinfo/texinfo-4.13a-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/gawk/gawk-3.1.7-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/gzip/gzip-1.3.12-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/grep/grep-2.5.4-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/file/file-5.03-1/
+(bin, dll)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/sed/sed-4.2.1-1/
+(bin)
+
+http://sourceforge.net/projects/mingw/files/MSYS/Base/termcap/termcap-0.20050421_1-1/
+(bin)
+
+
+
+-
+
+
+Add
+;C:\MinGW\bin;C:\MinGW\msys\1.0\bin
+to environment variable
+HOME
+
+To add an environment variable:
+
+    Right-click on your "My Computer" icon and select "Properties".
+    Click on the "Advanced" tab, then on the "Environment Variables" button.
+    The top box shows your user settings. The PATH entry in this box is the one you want to modify.
+    Click on the PATH entry in the TOP box, then click on the "Edit" button
+    Scroll to the end of the string and at the end add
+
+    press OK -> OK -> OK and you are done.
+
+
+After setting the variables, close and re-open MinGW MSYS terminal window.
+
+
+-
+
+
+Download and install Glib:
+
+
+http://ftp.acc.umu.se/pub/gnome/binaries/win32/glib/2.20/
+
+glib-dev_2.20.5-1_win32.zip
+glib_2.20.5-1_win32.zip
+
+
+Unpack into
+/c/opt/gtk/old
+
+Then set corresponding environment variables:
+
+Add
+/c/opt/gtk/old/include
+to environment variable
+C_INCLUDE_PATH
+
+Add
+/c/opt/gtk/old/lib
+to environment variable
+LIBRARY_PATH
+
+Add
+;C:\opt\gtk\old\bin
+to environment variable
+HOME
+
+Add
+/c/MinGW/lib/pkgconfig
+to environment variable
+PKG_CONFIG_PATH
+
+
+
+-
+
+
+Download and install fdt:
+
+http://qemu.weilnetz.de/w32/development/
+libfdt.tar.bz2
+
+
+-
+
+
+Build SDL static library:
+
+
+http://www.libsdl.org/release/
+
+download source:
+SDL-1.2.13.tar.gz
+
+cd /c/path/to/SDL-1.2.13
+
+mkdir -p bld/release/native
+cd bld/release/native
+../../../configure --prefix=/c/min/sdl --enable-static --disable-shared
+make
+make install
+
+
+Then copy build results to C:\MinGW
+
+
+Edit /MinGW/bin/sdl-config, it should include following line:
+
+prefix=/c/MinGW
+
+
+
+-
+
+
+Download and install wpcap:
+
+
+http://www.winpcap.org/archive/
+
+Download:
+4.0-WpcapSrc.zip
+
+
+-
+
+
+Finally, cd to Qemu v0.11.0 source directory and build as usual:
+
+cd qemu
+mkdir -p bin/release/native
+cd bin/release/native
+../../../configure --static --target-list=i386-softmmu
+make
+make install
+
+
+
+
+
+
